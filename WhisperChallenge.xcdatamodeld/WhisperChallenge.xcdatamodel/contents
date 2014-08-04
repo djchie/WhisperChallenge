@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13E28" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="WhisperChallengeTweet" representedClassName="WCTweet" syncable="YES">
+        <attribute name="createdAtString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="favoriteCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="idString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="inReplyToScreenNameString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="inReplyToStatusIdString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="inReplyToUserIdString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="languageString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="placeString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="retweetCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="sourceString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="textString" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WhisperChallengeUser" inverseName="tweet" inverseEntity="WhisperChallengeUser" syncable="YES"/>
+    </entity>
+    <entity name="WhisperChallengeUser" representedClassName="WCUser" syncable="YES">
+        <attribute name="descriptionString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="favouritesCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="followersCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="friendsCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="idString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="locationString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="nameString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="profileBackgroundImageURLString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="profileImageURLString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="screenNameString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="statusesCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <relationship name="tweet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WhisperChallengeTweet" inverseName="user" inverseEntity="WhisperChallengeTweet" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="WhisperChallengeTweet" positionX="-6480" positionY="-4473" width="128" height="223"/>
+        <element name="WhisperChallengeUser" positionX="-6228" positionY="-4471" width="128" height="223"/>
+    </elements>
+</model>
