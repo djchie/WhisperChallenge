@@ -10,8 +10,8 @@
 
 @implementation WCTweetDP
 
-@synthesize savedTweetsMutableArray, tweetsCoreDataMutableArray, usersCoreDataMutableArray;
-@synthesize managedObjectContext, privateManagedObjectContext;
+@synthesize savedTweetsMutableArray, tweetsCoreDataMutableArray, usersCoreDataMutableArray, allTweetsMutableArray;
+@synthesize managedObjectContext;
 @synthesize bearerTokenString, accessTokenString, tokenTypeString;
 @synthesize authentificationConnection, popularTweetsConnection, recentTweetsConnection;
 @synthesize popularTweetsResponseData, recentTweetsResponseData;
@@ -49,6 +49,7 @@ static WCTweetDP *sharedInstance = nil;
         savedTweetsMutableArray = [[NSMutableArray alloc] init];
         tweetsCoreDataMutableArray = [[NSMutableArray alloc] init];
         usersCoreDataMutableArray = [[NSMutableArray alloc] init];
+        allTweetsMutableArray = [[NSMutableArray alloc] init];
 
         NSString* accessTokenUserDefaultString = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultAccessToken];
 		if (accessTokenUserDefaultString != nil)
@@ -64,8 +65,6 @@ static WCTweetDP *sharedInstance = nil;
         AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
         managedObjectContext = appDelegate.managedObjectContext;
         [self fetchCoreDataObjects];
-
-        privateManagedObjectContext = appDelegate.privateManagedObjectContext;
     }
 
     return self;
@@ -82,59 +81,9 @@ static WCTweetDP *sharedInstance = nil;
 {
     if (![savedTweetsMutableArray containsObject:tweet])
     {
-        [self passManagedObjectFromPrivateToMain:tweet];
-//        [self passManagedObjectFromPrivateToMain:tweet.user];
-
-//        [managedObjectContext insertObject:tweet];
-//        [managedObjectContext insertObject:tweet.user];
-
-        [tweetsCoreDataMutableArray addObject:tweet];
-        [usersCoreDataMutableArray addObject:tweet.user];
-
-//        WCUser* user = tweet.user;
-//        [savedTweetsMutableArray addObject:tweet];
-//
-//        NSManagedObject* tweetManagedObject = [NSEntityDescription insertNewObjectForEntityForName:@"WhisperChallengeTweet" inManagedObjectContext:managedObjectContext];
-//        [tweetManagedObject setValue:tweet.createdAtString forKey:@"createdAtString"];
-//        [tweetManagedObject setValue:[NSNumber numberWithInt:tweet.favoriteCount] forKey:@"favoriteCount"];
-//        [tweetManagedObject setValue:tweet.idString forKey:@"idString"];
-//        if (tweet.inReplyToScreenNameString != (id)[NSNull null])
-//        {
-//            [tweetManagedObject setValue:tweet.inReplyToScreenNameString forKey:@"inReplyToScreenNameString"];
-//        }
-//        if (tweet.inReplyToStatusIdString != (id)[NSNull null])
-//        {
-//            [tweetManagedObject setValue:tweet.inReplyToStatusIdString forKey:@"inReplyToStatusIdString"];
-//        }
-//        if (tweet.inReplyToUserIdString != (id)[NSNull null])
-//        {
-//            [tweetManagedObject setValue:tweet.inReplyToUserIdString forKey:@"inReplyToUserIdString"];
-//        }
-//        [tweetManagedObject setValue:tweet.languageString forKey:@"languageString"];
-//        if (tweet.placeString != (id)[NSNull null])
-//        {
-//            [tweetManagedObject setValue:tweet.placeString forKey:@"placeString"];
-//        }
-//        [tweetManagedObject setValue:[NSNumber numberWithInt:tweet.retweetCount] forKey:@"retweetCount"];
-//        [tweetManagedObject setValue:tweet.sourceString forKey:@"sourceString"];
-//        [tweetManagedObject setValue:tweet.textString forKey:@"textString"];
-//
-//        [tweetsCoreDataMutableArray addObject:tweetManagedObject];
-//
-//        NSManagedObject* userManagedObject = [NSEntityDescription insertNewObjectForEntityForName:@"WhisperChallengeUser" inManagedObjectContext:managedObjectContext];
-//        [userManagedObject setValue:user.descriptionString forKey:@"descriptionString"];
-//        [userManagedObject setValue:[NSNumber numberWithInt:user.favouritesCount] forKey:@"favouritesCount"];
-//        [userManagedObject setValue:[NSNumber numberWithInt:user.followersCount] forKey:@"followersCount"];
-//        [userManagedObject setValue:[NSNumber numberWithInt:user.friendsCount] forKey:@"friendsCount"];
-//        [userManagedObject setValue:user.idString forKey:@"idString"];
-//        [userManagedObject setValue:user.locationString forKey:@"locationString"];
-//        [userManagedObject setValue:user.nameString forKey:@"nameString"];
-//        [userManagedObject setValue:user.profileBackgroundImageURLString forKey:@"profileBackgroundImageURLString"];
-//        [userManagedObject setValue:user.profileImageURLString forKey:@"profileImageURLString"];
-//        [userManagedObject setValue:user.screenNameString forKey:@"screenNameString"];
-//        [userManagedObject setValue:[NSNumber numberWithInt:user.statusesCount] forKey:@"statusesCount"];
-//
-//        [usersCoreDataMutableArray addObject:userManagedObject];
+        tweet.isSaved = YES;
+        [managedObjectContext insertObject:tweet];
+        [savedTweetsMutableArray addObject:tweet];
     }
 }
 
@@ -150,45 +99,16 @@ static WCTweetDP *sharedInstance = nil;
 {
     if ([savedTweetsMutableArray containsObject:tweet])
     {
-        NSString* tweetIdString = tweet.idString;
-        NSString* userIdString = tweet.user.idString;
-
+        tweet.isSaved = NO;
         [savedTweetsMutableArray removeObject:tweet];
-
-        NSManagedObject* tweetDeleteManagedObject;
-        NSManagedObject* userDeleteManagedObject;
-
-        for (NSManagedObject* tweetManagedObject in tweetsCoreDataMutableArray)
-        {
-            if ([[tweetManagedObject valueForKey:@"idString"] isEqualToString:tweetIdString])
-            {
-                tweetDeleteManagedObject = tweetManagedObject;
-            }
-        }
-
-        for (NSManagedObject* userManagedObject in usersCoreDataMutableArray)
-        {
-            if ([[userManagedObject valueForKey:@"idString"] isEqualToString:userIdString])
-            {
-                userDeleteManagedObject = userManagedObject;
-            }
-        }
-
-        if (tweetDeleteManagedObject)
-        {
-            [managedObjectContext deleteObject:tweetDeleteManagedObject];
-            [tweetsCoreDataMutableArray removeObject:tweetDeleteManagedObject];
-        }
-
-        if (userDeleteManagedObject)
-        {
-            [managedObjectContext deleteObject:userDeleteManagedObject];
-            [usersCoreDataMutableArray removeObject:userDeleteManagedObject];
-        }
-
-        [managedObjectContext deleteObject:tweet];
         [managedObjectContext deleteObject:tweet.user];
+        [managedObjectContext deleteObject:tweet];
     }
+}
+
+- (void)clearAllTweetsMutableArray
+{
+    allTweetsMutableArray = [[NSMutableArray alloc] init];
 }
 
 #pragma mark - Core Data Methods
@@ -200,88 +120,59 @@ static WCTweetDP *sharedInstance = nil;
 	NSEntityDescription *tweetEntityDescription = [NSEntityDescription entityForName:@"WhisperChallengeTweet" inManagedObjectContext:managedObjectContext];
 	NSFetchRequest *tweetRequest = [[NSFetchRequest alloc] init];
 	[tweetRequest setEntity:tweetEntityDescription];
+    [tweetRequest setReturnsObjectsAsFaults:NO];
 	NSError *tweetRequestError;
 	NSArray *tweetArray = [managedObjectContext executeFetchRequest:tweetRequest error:&tweetRequestError];
 
-    NSEntityDescription *userEntityDescription = [NSEntityDescription entityForName:@"WhisperChallengeUser" inManagedObjectContext:managedObjectContext];
-	NSFetchRequest *userRequest = [[NSFetchRequest alloc] init];
-	[userRequest setEntity:userEntityDescription];
-	NSError *userRequestError;
-	NSArray *userArray = [managedObjectContext executeFetchRequest:userRequest error:&userRequestError];
+//    NSEntityDescription *userEntityDescription = [NSEntityDescription entityForName:@"WhisperChallengeUser" inManagedObjectContext:managedObjectContext];
+//	NSFetchRequest *userRequest = [[NSFetchRequest alloc] init];
+//	[userRequest setEntity:userEntityDescription];
+//    [userRequest setReturnsObjectsAsFaults:NO];
+//	NSError *userRequestError;
+//	NSArray *userArray = [managedObjectContext executeFetchRequest:userRequest error:&userRequestError];
 
-    int i = 0;
-    for (NSManagedObject* tweetManagedObject in tweetArray)
+    savedTweetsMutableArray = [NSMutableArray arrayWithArray:tweetArray];
+
+//    int i = 0;
+    for (WCTweet* tweet in savedTweetsMutableArray)
     {
-        WCTweet* tweet = [[WCTweet alloc] initWithEntity:tweetEntityDescription insertIntoManagedObjectContext:managedObjectContext];
-        [tweet updateWithTweetManagedObject:tweetManagedObject withUserManagedObject:[userArray objectAtIndex:i] withManagedObjectContext:managedObjectContext];
-
-        [savedTweetsMutableArray addObject:tweet];
-        [tweetsCoreDataMutableArray addObject:tweetManagedObject];
-        [usersCoreDataMutableArray addObject:[userArray objectAtIndex:i]];
-        [managedObjectContext deleteObject:tweetManagedObject];
-        [managedObjectContext deleteObject:[userArray objectAtIndex:i]];
-        i++;
+        tweet.isSaved = YES;
+        tweet.user = [tweet ];
+//        i++;
     }
+
+    [self printCounts];
+
+    [self cleanCoreDataObjects];
+
+    [self printCounts];
 }
 
-- (void)clearCoreDataObjects
+- (void)cleanCoreDataObjects
 {
-
-    NSFetchRequest *tweetFetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription *tweetEntity = [NSEntityDescription entityForName:@"WhisperChallengeTweet" inManagedObjectContext:managedObjectContext];
-    [tweetFetchRequest setEntity:tweetEntity];
-
-    NSError *tweetError = nil;
-    NSArray *tweetFetchedObjects = [self.managedObjectContext executeFetchRequest:tweetFetchRequest error:&tweetError];
-    if (tweetFetchedObjects == nil)
+	for (WCTweet* tweet in allTweetsMutableArray)
     {
-        NSLog(@"Could not delete Tweet Objects");
+		if (!tweet.isSaved)
+        {
+			[managedObjectContext deleteObject:tweet];
+            [managedObjectContext deleteObject:tweet.user];
+
+			[savedTweetsMutableArray removeObject:tweet];
+        }
     }
 
-    for (NSManagedObject* currentTweetObject in tweetFetchedObjects)
+	if (managedObjectContext.hasChanges)
     {
-        [managedObjectContext deleteObject:currentTweetObject];
+		[self saveContext];
     }
-
-    NSFetchRequest *userFetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription *userEntity = [NSEntityDescription entityForName:@"WhisperChallengeUser" inManagedObjectContext:managedObjectContext];
-    [userFetchRequest setEntity:userEntity];
-
-    NSError *userError = nil;
-    NSArray *userFetchedObjects = [self.managedObjectContext executeFetchRequest:userFetchRequest error:&userError];
-    if (userFetchedObjects == nil)
-    {
-        NSLog(@"Could not delete User Objects");
-    }
-
-    for (NSManagedObject* currentUserObject in userFetchedObjects)
-    {
-        [managedObjectContext deleteObject:currentUserObject];
-    }
-
-    [self saveContext];
 }
 
 - (void)saveContext
 {
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate saveContext];
-}
 
-- (void)passManagedObjectFromPrivateToMain:(NSManagedObject *)managedObject
-{
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:managedObject.entity.name];
-
-    [privateManagedObjectContext performBlock:^{
-        NSArray *results = [privateManagedObjectContext executeFetchRequest:request error:nil];
-        for (NSManagedObject *mo in results) {
-            NSManagedObjectID *moid = [mo objectID];
-            [managedObjectContext performBlock:^{
-                NSManagedObject *mainMO = [managedObjectContext objectWithID:moid];
-                [managedObjectContext insertObject:mainMO];
-            }];
-        }
-    }];
+    [[WCTweetDP sharedInstance] printCounts];
 }
 
 #pragma mark - Twitter API Authentification Methods
@@ -459,13 +350,13 @@ static WCTweetDP *sharedInstance = nil;
 
             for (NSDictionary* status in statusesArray)
             {
-                WCTweet* tweet = [NSEntityDescription insertNewObjectForEntityForName:@"WhisperChallengeTweet" inManagedObjectContext:privateManagedObjectContext];
-                [tweet updateWithDictionary:status withManagedObjectContext:privateManagedObjectContext];
+                WCTweet* tweet = [NSEntityDescription insertNewObjectForEntityForName:@"WhisperChallengeTweet" inManagedObjectContext:managedObjectContext];
+                [tweet updateWithDictionary:status withManagedObjectContext:managedObjectContext];
+                tweet.isSaved = NO;
 
                 [statusesMutableArray addObject:tweet];
+                [allTweetsMutableArray addObject:tweet];
             }
-
-            [[WCTweetDP sharedInstance] printCounts];
 
             if ([connection isEqual:popularTweetsConnection])
             {
@@ -505,9 +396,7 @@ static WCTweetDP *sharedInstance = nil;
 
 - (void)printCounts
 {
-    NSLog(@"Number of Tweets/Users in App: %i", savedTweetsMutableArray.count);
-    NSLog(@"Number of Copied Core Data Tweets: %i", tweetsCoreDataMutableArray.count);
-    NSLog(@"Number of Copied Core Data Users: %i", usersCoreDataMutableArray.count);
+    NSLog(@"Number of Saved Tweets/Users in App: %i", savedTweetsMutableArray.count);
     [self fetchCountOfTweetCoreDataObjects];
     [self fetchCountOfUserCoreDataObjects];
 }

@@ -52,7 +52,6 @@
             saveCheckmarkImageView.image = [UIImage imageNamed:@"save_tweet.png"];
         }
     }
-
 }
 
 @end

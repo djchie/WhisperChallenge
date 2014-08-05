@@ -14,8 +14,7 @@
 
 @implementation WCSearchSavedViewController
 
-@synthesize twitterAPI;
-@synthesize popularSearchResultMutableArray, recentSearchResultMutableArray, toBeSavedResultMutableArray, toBeUnSavedResultMutableArray, popularOrRecentSelected, searchOrSavedSelected;
+@synthesize popularSearchResultMutableArray, recentSearchResultMutableArray, popularOrRecentSelected, searchOrSavedSelected;
 @synthesize saveButton, twitterSearchBar, searchResultTableView, savedResultTableView, searchSavedSegmentedControl, activityIndicator;
 
 #pragma mark - Initial Setup Methods
@@ -29,10 +28,6 @@
     [[WCTweetDP sharedInstance] requestAuthenticationFromTwitter];
 
     twitterSearchBar.delegate = self;
-    if (!twitterAPI)
-    {
-        twitterAPI = [STTwitterAPI twitterAPIAppOnlyWithConsumerKey:kTwitterAPIKey consumerSecret:kTwitterAPISecret];
-    }
 
     if (!popularSearchResultMutableArray)
     {
@@ -42,16 +37,6 @@
     if (!recentSearchResultMutableArray)
     {
         recentSearchResultMutableArray = [[NSMutableArray alloc] init];
-    }
-
-    if (!toBeSavedResultMutableArray)
-    {
-        toBeSavedResultMutableArray = [[NSMutableArray alloc] init];
-    }
-
-    if (!toBeUnSavedResultMutableArray)
-    {
-        toBeUnSavedResultMutableArray = [[NSMutableArray alloc] init];
     }
 
     searchResultTableView.contentInset = UIEdgeInsetsZero;
@@ -140,6 +125,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     WCTweet* tweet;
+    int selectedCount = 0;
 
     if (tableView == searchResultTableView)
     {
@@ -156,26 +142,32 @@
         {
             tweet.selectedToBeSaved = YES;
 
-            if (![[[WCTweetDP sharedInstance] getSavedTweets] containsObject:tweet])
-            {
-                [toBeSavedResultMutableArray addObject:tweet];
-            }
-
-            if (saveButton.enabled == NO)
-            {
-                saveButton.enabled = YES;
-            }
+            saveButton.enabled = YES;
         }
         else
         {
-            tweet.selectedToBeSaved = NO;
+            for (WCTweet* currentTweet in popularSearchResultMutableArray)
+            {
+                if (currentTweet.selectedToBeSaved)
+                {
+                    selectedCount++;
+                }
+            }
 
-            [toBeSavedResultMutableArray removeObject:tweet];
+            for (WCTweet* currentTweet in recentSearchResultMutableArray)
+            {
+                if (currentTweet.selectedToBeSaved)
+                {
+                    selectedCount++;
+                }
+            }
 
-            if (toBeSavedResultMutableArray.count == 0)
+            if (selectedCount == 0)
             {
                 saveButton.enabled = NO;
             }
+
+            tweet.selectedToBeSaved = NO;
         }
     }
     else if (tableView == savedResultTableView)
@@ -186,23 +178,32 @@
         {
             tweet.selectedToBeUnSaved = YES;
 
-            [toBeUnSavedResultMutableArray addObject:tweet];
-
-            if (saveButton.enabled == NO)
-            {
-                saveButton.enabled = YES;
-            }
+            saveButton.enabled = YES;
         }
         else
         {
-            tweet.selectedToBeUnSaved = NO;
+            for (WCTweet* currentTweet in popularSearchResultMutableArray)
+            {
+                if (currentTweet.selectedToBeSaved)
+                {
+                    selectedCount++;
+                }
+            }
 
-            [toBeUnSavedResultMutableArray removeObject:tweet];
+            for (WCTweet* currentTweet in recentSearchResultMutableArray)
+            {
+                if (currentTweet.selectedToBeSaved)
+                {
+                    selectedCount++;
+                }
+            }
 
-            if (toBeUnSavedResultMutableArray.count == 0)
+            if (selectedCount == 0)
             {
                 saveButton.enabled = NO;
             }
+
+            tweet.selectedToBeUnSaved = NO;
         }
     }
 
@@ -223,9 +224,7 @@
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
-//    [popularSearchResultMutableArray removeAllObjects];
-//    [recentSearchResultMutableArray removeAllObjects];
-
+    [[WCTweetDP sharedInstance] clearAllTweetsMutableArray];
     [self fetchPopularTweetsWithString:searchBar.text];
     [self fetchRecentTweetsWithString:searchBar.text];
 
@@ -264,19 +263,23 @@
     {
         for (WCTweet* tweet in popularSearchResultMutableArray)
         {
+            if (tweet.selectedToBeSaved)
+            {
+                [[WCTweetDP sharedInstance] saveTweet:tweet];
+            }
+
             tweet.selectedToBeSaved = NO;
-            tweet.isSaved = YES;
         }
 
         for (WCTweet* tweet in recentSearchResultMutableArray)
         {
+            if (tweet.selectedToBeSaved)
+            {
+                [[WCTweetDP sharedInstance] saveTweet:tweet];
+            }
+
             tweet.selectedToBeSaved = NO;
-            tweet.isSaved = YES;
         }
-
-        [[WCTweetDP sharedInstance] saveTweets:toBeSavedResultMutableArray];
-
-        [toBeSavedResultMutableArray removeAllObjects];
 
         [searchResultTableView reloadData];
         saveButton.enabled = NO;
@@ -286,17 +289,15 @@
     }
     else if (searchSavedSegmentedControl.selectedSegmentIndex == 1)
     {
-        for (WCTweet* tweet in toBeUnSavedResultMutableArray)
+        for (WCTweet* tweet in [[WCTweetDP sharedInstance] getSavedTweets])
         {
+            if (tweet.selectedToBeUnSaved)
+            {
+                [[WCTweetDP sharedInstance] unSaveTweet:tweet];
+            }
+
             tweet.selectedToBeUnSaved = NO;
-            tweet.isSaved = NO;
-
-            [[WCTweetDP sharedInstance] unSaveTweet:tweet];
         }
-
-        [toBeUnSavedResultMutableArray removeAllObjects];
-
-        saveButton.enabled = NO;
 
         [savedResultTableView reloadData];
         saveButton.enabled = NO;
@@ -305,11 +306,7 @@
         alertMessageString = @"The selected tweets have been unsaved!";
     }
 
-    [[WCTweetDP sharedInstance] printCounts];
-
-    [[WCTweetDP sharedInstance] saveContext];
-
-    [[WCTweetDP sharedInstance] printCounts];
+    [[WCTweetDP sharedInstance] cleanCoreDataObjects];
     
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:alertTitleString message:alertMessageString delegate:self cancelButtonTitle:nil otherButtonTitles:@"Okay", nil];
     [alert show];
@@ -329,15 +326,6 @@
         searchResultTableView.hidden = NO;
         savedResultTableView.hidden = YES;
 
-        if (toBeSavedResultMutableArray.count == 0)
-        {
-            saveButton.enabled = NO;
-        }
-        else
-        {
-            saveButton.enabled = YES;
-        }
-
         [searchResultTableView reloadData];
     }
     else if (selectedSegment == 1)
@@ -348,15 +336,6 @@
         twitterSearchBar.hidden = YES;
         searchResultTableView.hidden = YES;
         savedResultTableView.hidden = NO;
-
-        if (toBeUnSavedResultMutableArray.count == 0)
-        {
-            saveButton.enabled = NO;
-        }
-        else
-        {
-            saveButton.enabled = YES;
-        }
 
         [savedResultTableView reloadData];
     }
@@ -443,3 +422,8 @@
 }
 
 @end
+
+// After saving, all the searched results not saved are nulled on the tableView --> need to make a copy when fetching?
+// After saving and terminating the app, the saved results are nulled --> something withth e conversion?
+// Implement delete object
+// Fix save/unsave button in this class

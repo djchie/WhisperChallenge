@@ -28,13 +28,13 @@
 @interface WCTweetDP : NSObject <NSURLConnectionDataDelegate>
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-@property (strong, nonatomic) NSManagedObjectContext *privateManagedObjectContext;
 
 //@property (strong, nonatomic) ACAccountStore* accountStore;
 
 @property (strong, nonatomic) NSMutableArray* savedTweetsMutableArray;
 @property (strong, nonatomic) NSMutableArray* tweetsCoreDataMutableArray;
 @property (strong, nonatomic) NSMutableArray* usersCoreDataMutableArray;
+@property (strong, nonatomic) NSMutableArray* allTweetsMutableArray;
 
 @property (strong, nonatomic) NSString* accessTokenString;
 @property (readonly, nonatomic) NSString* bearerTokenString;
@@ -57,9 +57,10 @@
 - (void)saveTweet:(WCTweet *)tweet;
 - (void)saveTweets:(NSMutableArray *)tweets;
 - (void)unSaveTweet:(WCTweet *)tweet;
+- (void)clearAllTweetsMutableArray;
 
 - (void)fetchCoreDataObjects;
-- (void)clearCoreDataObjects;
+- (void)cleanCoreDataObjects;
 - (void)saveContext;
 
 - (void)fetchPopularTweetsWithString:(NSString *)searchString;

@@ -13,17 +13,17 @@
 
 @interface WCTweet : NSManagedObject <NSCopying>
 
-@property (copy, nonatomic) NSString* createdAtString;
+@property (strong, nonatomic) NSString* createdAtString;
 @property (nonatomic) NSInteger favoriteCount;
-@property (copy, nonatomic) NSString* idString;
-@property (copy, nonatomic) NSString* inReplyToScreenNameString;
-@property (copy, nonatomic) NSString* inReplyToStatusIdString;
-@property (copy, nonatomic) NSString* inReplyToUserIdString;
-@property (copy, nonatomic) NSString* languageString;
-@property (copy, nonatomic) NSString* placeString;
+@property (strong, nonatomic) NSString* idString;
+@property (strong, nonatomic) NSString* inReplyToScreenNameString;
+@property (strong, nonatomic) NSString* inReplyToStatusIdString;
+@property (strong, nonatomic) NSString* inReplyToUserIdString;
+@property (strong, nonatomic) NSString* languageString;
+@property (strong, nonatomic) NSString* placeString;
 @property (nonatomic) NSInteger retweetCount;
-@property (copy, nonatomic) NSString* sourceString;
-@property (copy, nonatomic) NSString* textString;
+@property (strong, nonatomic) NSString* sourceString;
+@property (strong, nonatomic) NSString* textString;
 @property (strong, nonatomic) WCUser *user;
 
 @property (nonatomic) BOOL selectedToBeSaved;
@@ -31,6 +31,5 @@
 @property (nonatomic) BOOL isSaved;
 
 - (void)updateWithDictionary:(NSDictionary *)dictionary withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext;
-- (void)updateWithTweetManagedObject:(NSManagedObject *)tweetManagedObject withUserManagedObject:(NSManagedObject *)userManagedObject withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext;
 
 @end

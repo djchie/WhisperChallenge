@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import <Accounts/Accounts.h>
 #import <Social/Social.h>
-#import "STTwitterAPI.h"
 #import "WCTweet.h"
 #import "WCTweetTableViewCell.h"
 #import "WCTweetDetailViewController.h"
@@ -18,13 +17,9 @@
 
 @interface WCSearchSavedViewController : UIViewController <UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate, WCAuthDelegate>
 
-@property (strong, nonatomic) STTwitterAPI* twitterAPI;
-
 @property (strong, nonatomic) NSMutableArray* popularSearchResultMutableArray;
 @property (strong, nonatomic) NSMutableArray* recentSearchResultMutableArray;
-@property (strong, nonatomic) NSMutableArray* toBeSavedResultMutableArray;
 @property (strong, nonatomic) NSMutableArray* savedResultMutableArray;
-@property (strong, nonatomic) NSMutableArray* toBeUnSavedResultMutableArray;
 @property (nonatomic) BOOL popularOrRecentSelected;
 @property (nonatomic) BOOL searchOrSavedSelected;
 

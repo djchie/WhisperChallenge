@@ -42,32 +42,68 @@
 
 - (void)updateWithDictionary:(NSDictionary *)dictionary
 {
-    descriptionString = [dictionary objectForKey:@"description"];
+    if ([dictionary objectForKey:@"description"] != [NSNull null])
+    {
+        descriptionString = [dictionary objectForKey:@"description"];
+    }
+
     favouritesCount = [[dictionary objectForKey:@"favourites_count"] intValue];
     followersCount = [[dictionary objectForKey:@"followers_count"] intValue];
     friendsCount = [[dictionary objectForKey:@"friends_count"] intValue];
-    idString = [dictionary objectForKey:@"id_str"];
-    locationString = [dictionary objectForKey:@"location"];
-    nameString = [dictionary objectForKey:@"name"];
-    profileBackgroundImageURLString = [dictionary objectForKey:@"profile_background_image_url"];
-    profileImageURLString = [dictionary objectForKey:@"profile_image_url"];
-    screenNameString = [dictionary objectForKey:@"screen_name"];
+
+    if ([dictionary objectForKey:@"id_str"] != [NSNull null])
+    {
+        idString = [dictionary objectForKey:@"id_str"];
+    }
+    if ([dictionary objectForKey:@"location"] != [NSNull null])
+    {
+        locationString = [dictionary objectForKey:@"location"];
+    }
+    if ([dictionary objectForKey:@"name"])
+    {
+        nameString = [dictionary objectForKey:@"name"];
+    }
+    if ([dictionary objectForKey:@"profile_background_image_url"])
+    {
+        profileBackgroundImageURLString = [dictionary objectForKey:@"profile_background_image_url"];
+    }
+    if ([dictionary objectForKey:@"profile_image_url"])
+    {
+        profileImageURLString = [dictionary objectForKey:@"profile_image_url"];
+    }
+    if ([dictionary objectForKey:@"screen_name"])
+    {
+        screenNameString = [dictionary objectForKey:@"screen_name"];
+    }
+
     statusesCount = [[dictionary objectForKey:@"statuses_count"] intValue];
 }
 
-- (void)updateWithUserManagedObject:(NSManagedObject *)userManagedObject
+- (NSManagedObjectID*) permanentObjectID
 {
-    descriptionString = [userManagedObject valueForKey:@"descriptionString"];
-    favouritesCount = [[userManagedObject valueForKey:@"favouritesCount"] intValue];
-    followersCount = [[userManagedObject valueForKey:@"followersCount"] intValue];
-    friendsCount = [[userManagedObject valueForKey:@"friendsCount"] intValue];
-    idString = [userManagedObject valueForKey:@"idString"];
-    locationString = [userManagedObject valueForKey:@"locationString"];
-    nameString = [userManagedObject valueForKey:@"nameString"];
-    profileBackgroundImageURLString = [userManagedObject valueForKey:@"profileBackgroundImageURLString"];
-    profileImageURLString = [userManagedObject valueForKey:@"profileImageURLString"];
-    screenNameString = [userManagedObject valueForKey:@"screenNameString"];
-    statusesCount = [[userManagedObject valueForKey:@"statusesCount"] intValue];
+    NSManagedObjectID *theID = [self objectID];
+
+    if ([theID isTemporaryID])
+    {
+        return nil;
+    }
+
+    return theID;
+}
+
+- (void) makeObjectIDPermanent
+{
+    if ([[self objectID] isTemporaryID])
+    {
+        NSError *err;
+        NSManagedObjectContext *moc = [self managedObjectContext];
+
+        BOOL success = [moc obtainPermanentIDsForObjects:@[self] error:&err];
+        if ( !success )
+        {
+            // Deal with error
+        }
+    }
 }
 
 @end

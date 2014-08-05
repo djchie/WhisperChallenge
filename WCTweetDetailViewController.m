@@ -92,7 +92,7 @@
         alertMessageString = @"You have unsaved this tweet!";
     }
 
-    [[WCTweetDP sharedInstance] saveContext];
+    [[WCTweetDP sharedInstance] cleanCoreDataObjects];
 
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:alertTitleString message:alertMessageString delegate:self cancelButtonTitle:nil otherButtonTitles:@"Okay", nil];
     [alert show];

@@ -12,19 +12,18 @@
 
 @interface WCUser : NSManagedObject <NSCopying>
 
-@property (copy, nonatomic) NSString* descriptionString;
+@property (strong, nonatomic) NSString* descriptionString;
 @property (nonatomic) NSInteger favouritesCount;
 @property (nonatomic) NSInteger followersCount;
 @property (nonatomic) NSInteger friendsCount;
-@property (copy, nonatomic) NSString* idString;
-@property (copy, nonatomic) NSString* locationString;
-@property (copy, nonatomic) NSString* nameString;
-@property (copy, nonatomic) NSString* profileBackgroundImageURLString;
-@property (copy, nonatomic) NSString* profileImageURLString;
-@property (copy, nonatomic) NSString* screenNameString;
+@property (strong, nonatomic) NSString* idString;
+@property (strong, nonatomic) NSString* locationString;
+@property (strong, nonatomic) NSString* nameString;
+@property (strong, nonatomic) NSString* profileBackgroundImageURLString;
+@property (strong, nonatomic) NSString* profileImageURLString;
+@property (strong, nonatomic) NSString* screenNameString;
 @property (nonatomic) NSInteger statusesCount;
 
 - (void)updateWithDictionary:(NSDictionary *)dictionary;
-- (void)updateWithUserManagedObject:(NSManagedObject *)userManagedObject;
 
 @end
